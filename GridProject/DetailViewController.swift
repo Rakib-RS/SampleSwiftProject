@@ -55,23 +55,24 @@ struct DetailViewController: View {
         )
     }
     
-    struct ImageSlider: View {
-        let numberOfImages: Int
-        
-        var body: some View {
-            HStack(
-                alignment: .center,
-                spacing: 0,
-                content: {
-                    ForEach(0..<numberOfImages, id: \.self) { _ in
-                        Image(systemName: "star.fill")
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .foregroundColor(.yellow)
-                    }
+}
+
+struct ImageSlider: View {
+    let numberOfImages: Int
+    
+    var body: some View {
+        HStack(
+            alignment: .center,
+            spacing: 0,
+            content: {
+                ForEach(0..<numberOfImages, id: \.self) { _ in
+                    Image(systemName: "star.fill")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .foregroundColor(.yellow)
                 }
-            )
-        }
+            }
+        )
     }
 }
 

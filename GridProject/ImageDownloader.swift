@@ -36,6 +36,7 @@ class ImageDownloader: ObservableObject {
     private var cancellables: Set<AnyCancellable> = []
     
     private init() {
+        setInitialImageInfo()
         fetchImage()
     }
     
@@ -88,28 +89,7 @@ class ImageDownloader: ObservableObject {
             if result {
                 //print("count: \(self.ImageURLs)")
                 self.imageURLs.enumerated().forEach() { (index, imageURL) in
-                    //                    let producer = SignalProducer<Data, NSError> { observer, disposable in
-                    //                        URLSession.shared.dataTask(with: imageURL) { data, _, error in
-                    //                            if let error = error as? NSError {
-                    //                                observer.send(error: error)
-                    //                            } else if let data {
-                    //                                print("data success")
-                    //                                observer.send(value: data)
-                    //                                observer.sendCompleted()
-                    //                            }
-                    //                        }.resume()
-                    //                    }
-                    //
-                    //                    producer
-                    //                        .map { UIImage(data: $0)}
-                    //                        .skipNil()
-                    //                        .startWithResult { [weak self] downloadResponse in
-                    //                            switch downloadResponse {
-                    //                            case .success(let downloadImage): self?.images.append(downloadImage)
-                    //                            case .failure(let error): print("[ImageDownloader] failed to get image: \(error)")
-                    //                            }
-                    //                        }
-                    //                        .dispose()
+                    
                     URLSession.shared.dataTaskPublisher(for: imageURL)
                         .map(\.data)
                         .compactMap { UIImage(data: $0) }
@@ -117,8 +97,7 @@ class ImageDownloader: ObservableObject {
                         .receive(on: DispatchQueue.main)
                         .sink { [weak self] image in
                             if let image = image {
-                                let imageInfo = ImageInfo(id: index, image: image, rating: Int.random(in: 1...5))
-                                self?.imagesInfo.append(imageInfo)
+                                self?.imagesInfo[index].image = image
                             }
                         }
                         .store(in: &self.cancellables)
@@ -139,6 +118,13 @@ class ImageDownloader: ObservableObject {
     func updateRaing(with id: Int, newRating: Int) {
         if let index = imagesInfo.firstIndex(where: { $0.id == id} ) {
             imagesInfo[index].rating = newRating
+        }
+    }
+    
+    func setInitialImageInfo() {
+        for index in 0...30 {
+            let imageInfo = ImageInfo(id: index, image: UIImage(), rating: Int.random(in: 1...5))
+            imagesInfo.append(imageInfo)
         }
     }
 }
