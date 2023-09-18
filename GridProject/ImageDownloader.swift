@@ -27,6 +27,23 @@ struct ImageInfo: Hashable {
     var rating: Int
 }
 
+struct UnsplashResponse: Codable {
+    let results: [UnsplashImage]
+}
+
+struct UnsplashImage: Codable, Identifiable {
+    let id: String
+    let description: String?
+    let urls: UnsplashImageUrls
+}
+
+struct UnsplashImageUrls: Codable {
+    let regular: String
+    var regularURL: URL {
+        return URL(string: regular)!
+    }
+}
+
 class ImageDownloader: ObservableObject {
     static let shared = ImageDownloader()
     var imageURLs: [URL] = []
@@ -34,22 +51,24 @@ class ImageDownloader: ObservableObject {
     @Published var imagesInfo: [ImageInfo] = []
     
     private var cancellables: Set<AnyCancellable> = []
+    private let accessKey = "Rj4XreSyVEVD7TLBXA1oCTCHETlncgw4GpAwFCWUo0s"
+    let searchText = "flower"
     
     private init() {
         setInitialImageInfo()
         fetchImage()
     }
     
+    //"https://api.unsplash.com/photos/?client_id=\(api)&order_by=ORDER&per_page=30")
+    
     func fetchImagesURLs(completion: @escaping(Bool) -> Void) {
-        guard let apiUrl = URL(string: "https://api.unsplash.com/photos/?client_id=Rj4XreSyVEVD7TLBXA1oCTCHETlncgw4GpAwFCWUo0s&order_by=ORDER&per_page=30") else {
+        let searchQuery = searchText.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        let urlString = "https://api.unsplash.com/search/photos?client_id=\(accessKey)&query=\(searchQuery)"
+        guard let apiUrl = URL(string: urlString) else {
             completion(false)
             return
         }
         
-        var request = URLRequest(url: apiUrl)
-        request.setValue("Bearer lgkyjtMJUDC18PPcrwYHZkTf7D1LKpp3QE6JVcKOABcwz2I7bB0hAbSD", forHTTPHeaderField: "Authorization")
-        
-        print("request: \(request)")
         
         let session = URLSession.shared
         
@@ -70,9 +89,9 @@ class ImageDownloader: ObservableObject {
             
             do {
                 let decoder = JSONDecoder()
-                let picInfo = try decoder.decode([DownloadImageInfo].self, from: data)
-                self.imageURLs = picInfo.map { $0.urls.regularURL }
-                // print(self.ImageURLs)
+                let picInfo = try decoder.decode(UnsplashResponse.self, from: data)
+                let results = picInfo.results
+                self.imageURLs = results.map { $0.urls.regularURL }
                 completion(true)
                 
             } catch {

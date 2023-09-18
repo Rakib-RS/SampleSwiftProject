@@ -17,7 +17,7 @@ struct DetailViewController: View {
         _id = State(initialValue: id)
         _sliderValue = State(initialValue: Double(ImageDownloader.shared.getRating(with: id)))
         
-        print("sliderValue: \(sliderValue)")
+        //print("sliderValue: \(sliderValue)")
     }
     
     var body: some View {
