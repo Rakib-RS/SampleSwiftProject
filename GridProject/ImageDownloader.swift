@@ -2,7 +2,7 @@
 //  ImageDownloader.swift
 //  GridProject
 //
-//  Created by macbook on 1/9/23.
+//  Created by Rakib on 1/9/23.
 //
 
 import Combine
@@ -38,7 +38,11 @@ struct UnsplashImage: Codable, Identifiable {
 }
 
 struct UnsplashImageUrls: Codable {
+    let raw: String
+    let full: String
     let regular: String
+    let small: String
+    let thumb: String
     var regularURL: URL {
         return URL(string: regular)!
     }
@@ -51,8 +55,11 @@ class ImageDownloader: ObservableObject {
     @Published var imagesInfo: [ImageInfo] = []
     
     private var cancellables: Set<AnyCancellable> = []
+    
     private let accessKey = "Rj4XreSyVEVD7TLBXA1oCTCHETlncgw4GpAwFCWUo0s"
     let searchText = "flower"
+    let currentPage = 1
+    let imagesPerPage = 30
     
     private init() {
         setInitialImageInfo()
@@ -63,7 +70,7 @@ class ImageDownloader: ObservableObject {
     
     func fetchImagesURLs(completion: @escaping(Bool) -> Void) {
         let searchQuery = searchText.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-        let urlString = "https://api.unsplash.com/search/photos?client_id=\(accessKey)&query=\(searchQuery)"
+        let urlString = "https://api.unsplash.com/search/photos?client_id=\(accessKey)&query=\(searchQuery)&page=\(currentPage)&per_page=\(imagesPerPage)"
         guard let apiUrl = URL(string: urlString) else {
             completion(false)
             return
